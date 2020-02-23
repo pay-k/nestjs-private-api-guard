@@ -61,7 +61,7 @@ stages:
 
 - stage: Publish
   displayName: 'Publish'
-  dependsOn: Test
+  dependsOn: Build_Test
   jobs:
     - deployment: Publish
       displayName: 'Publish nestjs-private-api-guard'
