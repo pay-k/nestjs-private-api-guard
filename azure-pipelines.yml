@@ -77,5 +77,5 @@ stages:
                 inputs:
                   command: publish
                   workingDir: '$(Pipeline.Workspace)/drop'
-                  verbose: false
+                  verbose: true
                   publishEndpoint: NPMJS
