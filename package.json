@@ -1,8 +1,8 @@
 {
   "name": "@payk/nestjs-private-api-guard",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A NestJS API guard to block request to private apis",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest",
     "test:ci": "jest --ci --reporters=default --reporters=jest-junit --coverage --coverageReporters=cobertura",

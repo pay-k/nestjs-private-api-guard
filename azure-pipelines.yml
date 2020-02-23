@@ -49,7 +49,7 @@ stages:
             **/*
             !.git/**/*
             !node_modules/**/*
-            
+            !.gitignore
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
           CleanTargetFolder: true
 
