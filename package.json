@@ -1,6 +1,6 @@
 {
   "name": "@payk/nestjs-private-api-guard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A NestJS API guard to block request to private apis",
   "main": "index.js",
   "scripts": {
