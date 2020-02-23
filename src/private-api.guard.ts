@@ -8,16 +8,17 @@ export class PrivateApiGuard implements CanActivate {
   /**
    *
    */
-  constructor(private readonly reflector: Reflector) {
+  constructor(private readonly reflector: Reflector, private readonly header: string = 'X-Public-Api') {
     
   }
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     if (context.getType() === 'http') {
       const request = context.switchToHttp().getRequest();
       const isPublic = this.reflector.get<boolean>(api_keyword, context.getHandler());
-      return !(request.headers.public === "true") || isPublic;
+      return !(request.headers[this.header] === "true") || isPublic;
     }
     else {
       return true;
