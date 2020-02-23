@@ -18,7 +18,7 @@ export class PrivateApiGuard implements CanActivate {
     if (context.getType() === 'http') {
       const request = context.switchToHttp().getRequest();
       const isPublic = this.reflector.get<boolean>(api_keyword, context.getHandler());
-      return !(request.headers[this.header] === "true") || isPublic;
+      return !(request.headers[this.header.toLowerCase()] === "true") || isPublic;
     }
     else {
       return true;
