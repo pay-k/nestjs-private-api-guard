@@ -20,10 +20,10 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-  - script: |
+- script: |
     npm run test:ci
   displayName: 'Test & Coverage' 
-  - task: PublishTestResults@2
+- task: PublishTestResults@2
   condition: succeededOrFailed()
   inputs:
     testResultsFormat: 'JUnit'
@@ -31,19 +31,11 @@ steps:
     failTaskOnFailedTests: true
     testRunTitle: 'kyc-service'
     mergeTestResults: true
-  - task: PublishCodeCoverageResults@1
+- task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: 'Cobertura'
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/cobertura-coverage.xml'
     failIfCoverageEmpty: true
-
-
-
-# - task: PublishTestResults@2
-#   condition: succeededOrFailed()
-#   inputs:
-#     testResultsFormat: 'JUnit'
-#     testResultsFiles: '**/test-results.xml'
 
 - task: CopyFiles@2
   inputs:
@@ -61,3 +53,11 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'nestjs-response-utils'
     publishLocation: 'Container'
+
+- task: Npm@1
+  displayName: 'npm publish'
+  inputs:
+    command: publish
+    workingDir: '$(Build.ArtifactStagingDirectory)'
+    verbose: false
+    publishEndpoint: NPMJS
