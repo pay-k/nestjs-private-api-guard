@@ -2,62 +2,80 @@
 # Build a general Node.js project with npm.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+name: $(SourceBranchName)_$(date:yyyyMMdd)$(rev:.r)
 
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+stages:
+- stage: Build_Test
+  jobs:
+    - job: Build_and_Test
+      pool:
+        vmImage: 'ubuntu-latest'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
+      steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '10.x'
+        displayName: 'Install Node.js'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+      - script: |
+          npm install
+          npm run build
+        displayName: 'npm install and build'
 
-- script: |
-    npm run test:ci
-  displayName: 'Test & Coverage' 
-- task: PublishTestResults@2
-  condition: succeededOrFailed()
-  inputs:
-    testResultsFormat: 'JUnit'
-    testResultsFiles: 'junit.xml'
-    failTaskOnFailedTests: true
-    testRunTitle: 'kyc-service'
-    mergeTestResults: true
-- task: PublishCodeCoverageResults@1
-  inputs:
-    codeCoverageTool: 'Cobertura'
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/cobertura-coverage.xml'
-    failIfCoverageEmpty: true
+      - script: |
+          npm run test:ci
+        displayName: 'Test & Coverage' 
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: 'junit.xml'
+          failTaskOnFailedTests: true
+          testRunTitle: 'kyc-service'
+          mergeTestResults: true
+      - task: PublishCodeCoverageResults@1
+        inputs:
+          codeCoverageTool: 'Cobertura'
+          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/cobertura-coverage.xml'
+          failIfCoverageEmpty: true
 
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: '$(Build.SourcesDirectory)'
-    Contents: |
-      **/*
-      !.git/**/*
-      !node_modules/**/*
-      
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    CleanTargetFolder: true
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/*
+            !.git/**/*
+            !node_modules/**/*
+            
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          CleanTargetFolder: true
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'nestjs-response-utils'
-    publishLocation: 'Container'
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifact: 'drop'
+          publishLocation: 'pipeline'
 
-- task: Npm@1
-  displayName: 'npm publish'
-  inputs:
-    command: publish
-    workingDir: '$(Build.ArtifactStagingDirectory)'
-    verbose: false
-    publishEndpoint: NPMJS
+- stage: Publish
+  displayName: 'Publish'
+  dependsOn: Test
+  jobs:
+    - deployment: Publish
+      displayName: 'Publish nestjs-private-api-guard'
+      pool:
+          vmImage: 'ubuntu-latest'
+      environment: 'NPMJS'
+      strategy:
+          runOnce:
+            deploy:
+              steps:
+              - task: Npm@1
+                displayName: 'npm publish'
+                inputs:
+                  command: publish
+                  workingDir: '$(Pipeline.Workspace)/drop'
+                  verbose: false
+                  publishEndpoint: NPMJS
