@@ -26,6 +26,8 @@ in the `main.ts` after the `app` creation
   app.useGlobalGuards(new PrivateApiGuard(app.get(Reflector)));
 ```
 
+### Public End-Point
+Each call coming from outside the internal network will carry a header stating it came from the public.
 Add a decorator on top of your api end point you wish to expose through the Gateway
 ```ts
 @PublicApi()
@@ -43,3 +45,15 @@ You can choose a different header key name by passing the `PrivateApiGuard` anot
 ```ts
   app.useGlobalGuards(new PrivateApiGuard(app.get(Reflector), 'X-My-Cool-Public'));
 ```
+
+### Consumer Group End-Point (ACL)
+Each OAuth2 consumer has groups defined on him. We can use those groups in order to define access to specific end-point - for example, only the BackOffice can access that end-point, not the mobile (it's not per user, it's per consumer)
+Add a decorator on top of your api end point you wish to expose through the Gateway to a list of groups
+```ts
+@AllowedConsumerGroups('backoffice', 'admins')
+@Get()
+getAllUsers() {
+  return [];
+}
+```
+
